@@ -35,7 +35,7 @@ class FileSplit(object):
 
     def split(self, include_header=False, callback=None):
         """
-        Function to split the file to chunks based on the given encoding. Use this function if the file needs to be
+        Method to split the file to chunks based on the given encoding. Use this function if the file needs to be
         read be written to chucks as-is
         :param bool include_header: set to True to include header in each splits. Default: False
         :param callable callback: (Optional) callback function [func (str, long, long)] that accepts
@@ -75,7 +75,7 @@ class FileSplit(object):
 
     def splitbyencoding(self, rencoding="utf-8", wencoding="utf-8", include_header=False, callback=None):
         """
-        Function to split the file to chunks based on the given encoding. Use this function if the file needs to be
+        Method to split the file to chunks based on the given encoding. Use this function if the file needs to be
         read and be written to chucks of specific encoding format
         :param str rencoding: encoding of the input file; default utf-8
         :param str wencoding: encoding of the output file; default utf-8
@@ -176,20 +176,3 @@ class FileSplit(object):
         # Set the carryover flag if there are lines pending to be written next split
         carryover = True if self._carryover is not None else False
         return total_size, line_count, carryover
-
-
-if __name__ == "__main__":
-    import time
-    logging.basicConfig(level=logging.DEBUG)
-
-    def func(f, s, c):
-        print("file: {0}, size: {1}, count: {2}".format(f, s, c))
-
-    file = "C:\\Users\\ram.jayapalan\\Downloads\\dump\\KYOBI_OFFERS_01_20170828.dat"
-    outputdir = "C:\\Users\\ram.jayapalan\\Downloads\\test"
-
-    start = time.time()
-    filesplit = FileSplit(file, 30000000, outputdir)
-    filesplit.split(True, callback=func)
-    end = (time.time() - start)
-    print("runtime: {0}".format(end))
