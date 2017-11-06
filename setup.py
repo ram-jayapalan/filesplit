@@ -9,7 +9,7 @@ setup(
     author="Ram Prakash Jayapalan",
     author_email="ramp16888@gmail.com",
     url="https://github.com/ram-jayapalan/filesplit",
-    download_url="https://github.com/ram-jayapalan/filesplit/archive/v1.0-unstable.tar.gz",
+    download_url="https://github.com/ram-jayapalan/filesplit/archive/1.0.tar.gz",
     keywords=["python", "python3", "file split", "split file", "file split"],
     classifiers=[]
 )
