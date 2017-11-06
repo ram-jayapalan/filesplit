@@ -69,7 +69,7 @@ each file split.
 
     def func(f, s, c):
         print("file: {0}, size: {1}, count: {2}".format(f, s, c))
-        
+
     fs.split(callback=func)
 
 splitbyencoding (rencoding=“utf-8”, wencoding=“utf-8”, include_header=False, callback=None)
@@ -77,7 +77,8 @@ splitbyencoding (rencoding=“utf-8”, wencoding=“utf-8”, include_header=Fa
 
 This method is similar to the above ``split()`` method, except that the
 file encoding of the splits can be explicitly specified. This is helpful
-if the file chunks has to be of specific encoding standard. This method
-accepts two additional arguments to that of the ``split()`` method - -
-“rencoding” - encoding of the source file (default : ‘utf-8’) -
-“wencoding” - encoding of the output file chunks (default: ‘utf-8’)
+if the file chunks has to be of specific encoding standard.
+This method accepts two additional arguments to that of the ``split()`` method
+
+- “rencoding” - encoding of the source file (default : ‘utf-8’)
+- “wencoding” - encoding of the output file chunks (default: ‘utf-8’)
