@@ -1,6 +1,5 @@
-# README #
 
-File split made easy for python programmers.
+File split made easy for python programmers!
 
 A python module that can split files of any size into multiple chunks, with optimum use of memory and without compromising on
 performance. The module determines the splits based on the new line character in the file, therefore not writing incomplete
@@ -25,7 +24,7 @@ pip install filesplit
 Create an instance of the FileSplit object by passing file path and split size as arguments.
 
 ````
-from filesplit import FileSplit
+from fsplit.filesplit import FileSplit
 
 fs = FileSplit(file='path/to/file', splitsize=500000000, output_dir='/path/to/output directory/')
 
