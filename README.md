@@ -16,9 +16,17 @@ Python version: 2.7 and above (Python 3 recommended)
 
 ## Usage ##
 
+The module is available as a part of PyPI and can be easily installed using `pip`
+
+````
+pip install filesplit
+````
+
 Create an instance of the FileSplit object by passing file path and split size as arguments.
 
 ````
+from filesplit import FileSplit
+
 fs = FileSplit(file='path/to/file', splitsize=500000000, output_dir='/path/to/output directory/')
 
 ````
