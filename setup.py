@@ -11,6 +11,7 @@ setup(
     url="https://github.com/ram-jayapalan/filesplit",
     download_url="https://github.com/ram-jayapalan/filesplit/archive/1.0.2.tar.gz",
     keywords="file split filesplit splitfile chunks splits",
-    classifiers=[]
+    classifiers=[],
+    setup_cfg=True
 )
 
