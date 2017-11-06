@@ -3,7 +3,7 @@ from distutils.core import setup
 
 setup(
     name="filesplit",
-    packages=["package"],
+    packages=["fsplit"],
     version="1.0.0",
     description="Module to split file of any size into multiple chunks",
     author="Ram Prakash Jayapalan",
