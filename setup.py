@@ -23,7 +23,7 @@ setup(
     author="Ram Prakash Jayapalan",
     author_email="ramp16888@gmail.com",
     url="https://github.com/ram-jayapalan/filesplit",
-    download_url="https://github.com/ram-jayapalan/filesplit/archive/1.0.4.tar.gz",
+    download_url="https://github.com/ram-jayapalan/filesplit/archive/2.0.0.tar.gz",
     keywords="file split filesplit splitfile chunks splits",
     classifiers=[],
 )
