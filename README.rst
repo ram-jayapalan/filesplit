@@ -13,7 +13,7 @@ System Requirements
 
 Operating System: Windows/Linux/Mac
 
-Python version: 2.7 and above (Python 3 recommended)
+Python version: Python 3
 
 Usage
 -----
