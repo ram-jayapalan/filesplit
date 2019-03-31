@@ -17,7 +17,7 @@ def get_long_desc():
 setup(
     name="filesplit",
     packages=["fsplit"],
-    version="1.0.4",
+    version="2.0.0",
     description="Module to split file of any size into multiple chunks",
     long_description=get_long_desc(),
     author="Ram Prakash Jayapalan",
