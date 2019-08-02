@@ -1,19 +1,25 @@
-File split made easy for python programmers!
+.. image:: https://badge.fury.io/py/filesplit.png
+    :target: https://badge.fury.io/py/filesplit
+
+filesplit
+==========
+
+File splitting made easy for python programmers!
 
 A python module that can split files of any size into multiple chunks,
-with optimum use of memory and without compromising on performance. The
+with optimal of memory and without compromising performance. The
 module determines the splits based on the new line character in the
 file, therefore not writing incomplete lines to the file splits. The
-file splits are numbered from 1 to n as follows
+file splits are numbered from 1 to n as follows:
 
-[filename]_1.ext, [filename]_2.ext, …., [filename]_n.ext
+``[filename]_1.ext, [filename]_2.ext, …., [filename]_n.ext``
 
 System Requirements
--------------------
+--------------------
 
-Operating System: Windows/Linux/Mac
+**Operating System**: Windows/Linux/Mac
 
-Python version: Python 3
+**Python version**: Python 3
 
 Usage
 -----
@@ -28,7 +34,7 @@ using ``pip``
 Create an instance of the FileSplit object by passing file path and
 split size as arguments.
 
-::
+.. code-block:: python
 
     from fsplit.filesplit import FileSplit
 
@@ -48,15 +54,15 @@ binary mode under the hood which keeps the formatting and encoding of
 splits as-is to that of the source which should be sufficient to handle
 any file types.
 
-::
+.. code-block:: python
 
     fs.split()
 
 In case, if the file contains a header and if you want the header to be
 available in all of your splits, you can optionally set the flag
-“include_header” to True. By default it is set to False.
+“include_header” to ``True``. By default it is set to ``False``.
 
-::
+.. code-block:: python
 
     fs.split(include_header=True)
 
@@ -65,7 +71,7 @@ long)] that accepts three arguments - full path to the split, split file
 size (bytes) and line count. The callback function will be called after
 each file split.
 
-::
+.. code-block:: python
 
     def func(f, s, c):
         print("file: {0}, size: {1}, count: {2}".format(f, s, c))
