@@ -1,178 +1,279 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 __Author__ = 'Ram Jayapalan'
-__Version__ = '3.6.x'
-__Created__ = 'Aug 14, 2017'
+__PyVersion__ = '3'
+__Created__ = 'Sep 12, 2020'
 
 import logging
 import os
 import ntpath
+from pathlib import Path
+import math
+from typing import Callable, IO, Any, Tuple
+import csv
 
 
-class FileSplit(object):
-
-    def __init__(self, file, splitsize, output_dir="."):
+class FileSplit:
+    def __init__(self) -> None:
         """
         Constructor
-        :param str file: full path to the input file
-        :param long splitsize: file split size in bytes
-        :param str output_dir: path to the output directory
         """
-        self.log = logging.getLogger(__name__)
-        self.log.info("Initializing file split module.")
-        if not os.path.isfile(file):
-            raise FileNotFoundError("The given file path '{0}' is not valid".format(file))
-        self.file = file
-        self.log.info("Given input file : '{0}'".format(self.file))
-        if not os.path.exists(output_dir):
-            raise NotADirectoryError("The given output path '{0}' is not a valid directory".format(output_dir))
-        self.output_dir = output_dir
-        self.log.info("Given output directory: '{0}'".format(self.output_dir))
-        self._buffer_size = 1000000  # 1MB
-        self._header = None
-        self._carryover = None
-        self._split_size = splitsize
+        self._log = logging.getLogger(__name__).getChild(
+            self.__class__.__name__)
+        self._buffer_size = 1000000  # 1 MB
+        self._man_filename = "fs_manifest.csv"
 
-    def split(self, include_header=False, callback=None):
+    def __process_split(self,
+                        fi: IO,
+                        fo: IO,
+                        split_size: int,
+                        newline: bool = False,
+                        carry_over: str = None,
+                        output_encoding: str = None,
+                        include_header: bool = False,
+                        header: str = None) -> Tuple:
         """
-        Method to split the file to chunks based on the given encoding. Use this function if the file needs to be
-        read be written to chucks as-is
-        :param bool include_header: set to True to include header in each splits. Default: False
-        :param callable callback: (Optional) callback function [func (str, long, long)] that accepts
-        three arguments - full file path to the destination, size of the file in bytes and line count.
+        Process that splits the incoming stream
+        :param fi: input file like object that implements read() and readline() 
+        method
+        :param fo: file like object that implements write() method
+        :param split_size: file split size in bytes
+        :param newline: when True, splits at newline on top of bytes
+        :param output_encoding: split file encoding
+        :param include_header: when True, first line is treated as header and
+        each split receives the header. This flag is dependant on newline flag
+        to be set to True as well
+        :param carry_over: any carry over bytes to the next file
+        :param header: header from the file if any
+        :return:
         """
-        self.log.info("Total file size in bytes: {0}".format(os.path.getsize(self.file)))
-        self.log.info("Given split size: {0} bytes".format(self._split_size))
-        directory, file = ntpath.split(self.file)
-        filename, ext = os.path.splitext(file)
-        # Keep track of file splits and increment the file counter accordingly
-        filecounter = 1
-        # Open the file in read-only mode with the given encoding
-        with open(file=self.file, mode="rb") as f:
-            # Iterate and write to file in append mode.
-            while filecounter is not None:
-                outfile = os.path.join(self.output_dir, "{0}_{1}{2}".format(filename, filecounter, ext))
-                # Remove any existing file with the generated file name if exists in the output directory. This
-                # should automatically clean up existing files that needs to be regenerated.
-                if os.path.exists(outfile):
-                    self.log.debug("Removing an existing file with the filename '{0}'".format(outfile))
-                    os.remove(outfile)
-                with open(file=outfile, mode="ab") as of:
-                    self.log.info("Writing to file '{0}'".format(outfile))
-                    total_size, line_count, carryover = self._process_(f, of, include_header)
-                # Log the file details
-                self.log.info("Wrote to file '{0}' with {1} bytes of data".format(outfile, total_size))
-                # Return the file details to the callback function if applicable
-                if callback is not None:
-                    callback(outfile, total_size, line_count)
-                # Check if there is any carryover to the next file; if yes increment the filecounter and iterate again
-                # else exit
-                if carryover:
-                    filecounter += 1
-                else:
+        buffer_size = split_size if split_size < self._buffer_size else \
+            self._buffer_size
+        buffer = 0
+        if not newline:
+            while True:
+                if carry_over:
+                    fo.write(carry_over)
+                    buffer += len(carry_over) if not output_encoding else len(
+                        carry_over.encode(output_encoding))
+                    carry_over = None
+                    continue
+                chunk = fi.read(buffer_size)
+                if not chunk:
                     break
-        self.log.info("File split complete.")
-
-    def splitbyencoding(self, rencoding="utf-8", wencoding="utf-8", include_header=False, callback=None):
-        """
-        Method to split the file to chunks based on the given encoding. Use this function if the file needs to be
-        read and be written to chucks of specific encoding format
-        :param str rencoding: encoding of the input file; default utf-8
-        :param str wencoding: encoding of the output file; default utf-8
-        :param bool include_header: set to True to include header in each splits
-        :param callable callback: (Optional) callback function [func (str, long, long)] that accepts
-        three arguments - full file path to the destination, size of the file in bytes and line count.
-        :return: None
-        """
-        self.log.info("Total file size in bytes: {0}".format(os.path.getsize(self.file)))
-        self.log.info("Given split size: {0} bytes".format(self._split_size))
-        directory, file = ntpath.split(self.file)
-        filename, ext = os.path.splitext(file)
-        # Keep track of file splits and increment the file counter accordingly
-        filecounter = 1
-        # Open the file in read-only mode with the given encoding
-        with open(file=self.file, mode="r", encoding=rencoding) as f:
-            # Iterate and write to file in append mode.
-            while filecounter is not None:
-                outfile = os.path.join(self.output_dir, "{0}_{1}{2}".format(filename, filecounter, ext))
-                # Remove any existing file with the generated file name if exists in the output directory. This
-                # should automatically clean up existing files that needs to be regenerated.
-                if os.path.exists(outfile):
-                    self.log.debug("Removing an existing file with the filename '{0}'".format(outfile))
-                    os.remove(outfile)
-                with open(file=outfile, mode="a", encoding=wencoding) as of:
-                    self.log.info("Writing to file '{0}'".format(outfile))
-                    total_size, line_count, carryover = self._process_(f, of, include_header, wencoding)
-                # Log the file details
-                self.log.info("Wrote to file '{0}' with {1} bytes of data".format(outfile, total_size))
-                # Return the file details to the callback function if applicable
-                if callback is not None:
-                    callback(outfile, total_size, line_count)
-                # Check if there is any carryover to the next file; if yes increment the filecounter and iterate again
-                # else exit
-                if carryover:
-                    filecounter += 1
+                chunk_size = len(chunk) if not output_encoding else len(
+                    chunk.encode(output_encoding))
+                if buffer + chunk_size <= split_size:
+                    fo.write(chunk)
+                    buffer += chunk_size
                 else:
+                    carry_over = chunk
                     break
-        self.log.info("File split complete.")
+            return carry_over, buffer, None
+        else:
+            if carry_over:
+                if header:
+                    fo.write(header)
+                fo.write(carry_over)
+                buffer += len(carry_over) + len(
+                    header) if not output_encoding else len(
+                        carry_over.encode(output_encoding)) + len(
+                            header.encode(output_encoding))
+                carry_over = None
+            for line in fi:
+                if include_header and not header:
+                    header = line
+                line_size = len(line) if not output_encoding else len(
+                    line.encode(output_encoding))
+                if buffer + line_size <= split_size:
+                    fo.write(line)
+                    buffer += line_size
+                else:
+                    carry_over = line
+                    break
+            return carry_over, buffer, header
 
-    def _process_(self, f, of, include_header, wenc=None):
+    def split(self,
+              file: str,
+              split_size: int,
+              output_dir: str = ".",
+              callback: Callable = None,
+              **kwargs) -> None:
         """
-        Private function to handle the file splits
-        :param f: read file object stream
-        :param of: write file object stream
-        :param include_header: set to True if header needs to be included in the split files
-        :param wenc: encoding of the split files; default 'None' if the file needs to be written in binary mode
-        :return tuple: total size, line count, carryover (bool)
+        Splits the file into chunks based on the newline char in the file. 
+        By default uses binary mode.
+        :param file: path to the source file
+        :param split_size: file split size in bytes
+        :param output_dir: output dir to write the split files
+        :param callable callback: (Optional) callback function 
+        [func (str, long, long)] that accepts
+        three arguments - full file path to the destination, size of the file 
+        in bytes and line count.
         """
-        total_size = 0
-        li = []
-        current_size = 0
-        line_count = 0
-        # If the header needs to be included, treat the first line as header and capture the value beforehand
-        if include_header & (self._header is None):
-            self._header = f.readline()
-        # If the header is set to True, write header to each file splits
-        if self._header is not None:
-            of.write(self._header)
-            size = len(self._header.encode(wenc)) if wenc is not None else len(self._header)
-            current_size += size
-            total_size += size
-            line_count += 1
-        if self._carryover is not None:
-            of.write(self._carryover)
-            size = len(self._carryover.encode(wenc)) if wenc is not None else len(self._carryover)
-            current_size += size
-            total_size += size
-            self._carryover = None
-            line_count += 1
-        for line in f:
-            size = len(line.encode(wenc)) if wenc is not None else len(line)
-            current_size += size
-            total_size += size
-            line_count += 1
-            # Keep writing to the buffer list as long as the total byte size is within the limits
-            # of buffer and total split size
-            if (current_size <= self._buffer_size) & (total_size <= self._split_size):
-                li.append(line)
-                continue
-            # Write the buffer contents to the file if the total byte size exceeds the buffer size
-            # but is within the split size. Reset the total size and the buffer contents to empty.
-            elif (current_size > self._buffer_size) & (total_size <= self._split_size):
-                li.append(line)
-                of.write("".join(li)) if wenc is not None else of.write(b"".join(li))
-                current_size = 0
-                li = []
-            # If the split size threshold is reached, we don't want to write the current line to the
-            # current file. Instead, we carry over the line to the next file.
+        newline = kwargs.get("newline", False)
+        include_header = kwargs.get("include_header", False)
+        # If include_header is provided, default newline flag to True as this
+        # should apply only to structured file
+        if include_header:
+            newline = True
+        encoding = kwargs.get("encoding", None)
+        split_file_encoding = kwargs.get("split_file_encoding", None)
+
+        f = ntpath.split(file)[1]
+        filename, ext = os.path.splitext(f)
+        fi, man = None, None
+
+        # Split file encoding cannot be specified without specifying encoding
+        # which is required to read the file in text mode
+        if split_file_encoding and not encoding:
+            raise ValueError("`encoding` needs to be specified "
+                             "when providing `split_file_encoding`")
+        try:
+            # Determine the splits based off bytes when newline is set to False.
+            # If newline is True, split only at newline considering the bytes
+            # as well.
+            if encoding and not split_file_encoding:
+                fi = open(file=file, mode="r", encoding=encoding)
+            elif encoding and split_file_encoding:
+                fi = open(file=file, mode="r", encoding=encoding)
             else:
-                self._carryover = line
-                self._total_size = total_size - size
-                line_count = line_count - 1
-                break
-        # Empty buffer contents to file before exiting if at all there exists any that did not fit
-        # into the above if..elif..else logic.
-        of.write("".join(li)) if wenc is not None else of.write(b"".join(li))
-        # Set the carryover flag if there are lines pending to be written next split
-        carryover = True if self._carryover is not None else False
-        return total_size, line_count, carryover
+                fi = open(file=file, mode="rb")
+            # Create file handler for the manifest file
+            man_file = os.path.join(output_dir, self._man_filename)
+            man = open(file=man_file, mode="w+", encoding="utf-8")
+            # Create man file csv dict writer object
+            man_writer = csv.DictWriter(
+                f=man,
+                fieldnames=["filename", "filesize", "encoding", "header"])
+            # Write man file header
+            man_writer.writeheader()
+
+            split_counter, carry_over, header = 1, "", None
+
+            while carry_over is not None:
+                split_file = os.path.join(
+                    output_dir, "{0}_{1}{2}".format(filename, split_counter,
+                                                    ext))
+                fo = None
+                try:
+                    if encoding and not split_file_encoding:
+                        fo = open(file=split_file,
+                                  mode="w+",
+                                  encoding=encoding)
+                    elif encoding and split_file_encoding:
+                        fo = open(file=split_file,
+                                  mode="w+",
+                                  encoding=split_file_encoding)
+                    else:
+                        fo = open(file=split_file, mode="wb+")
+                    carry_over, output_size, header = self.__process_split(
+                        fi=fi,
+                        fo=fo,
+                        split_size=split_size,
+                        newline=newline,
+                        output_encoding=split_file_encoding,
+                        carry_over=carry_over,
+                        include_header=include_header,
+                        header=header)
+                    if callback:
+                        callback(split_file, output_size)
+                    # Write to manifest file
+                    di = {
+                        "filename": ntpath.split(split_file)[1],
+                        "filesize": output_size,
+                        "encoding": encoding,
+                        "header": True if header else None
+                    }
+                    man_writer.writerow(di)
+
+                    split_counter += 1
+                finally:
+                    if fo:
+                        fo.close()
+        finally:
+            if fi:
+                fi.close()
+            if man:
+                man.close()
+
+    def merge(self,
+              input_dir: str,
+              output_file: str,
+              manifest_file: str = None,
+              callback: Callable = None) -> None:
+        """Merges the split files based off manifest file
+
+        Args:
+            input_dir (str): directory containing the split files and manifest 
+            file
+
+            output_file (str): final merged output file path. If not provided,
+            the final merged filename is derived from the split filename and 
+            placed in the same input dir
+
+            callback (Callable): callback function 
+            [func (str, long)] that accepts 2 arguments - path to destination
+            , size of the file in bytes
+
+            manifest_file (str): path to the manifest file. If not provided, 
+            the process will look for the file within the input_dir
+        Raises:
+            FileNotFoundError: if missing manifest and split files
+
+            NotADirectoryError: if input path is not a directory
+        """
+        if not os.path.isdir(input_dir):
+            raise NotADirectoryError(
+                "Input directory is not a valid directory")
+
+        man_file = os.path.join(input_dir, self._man_filename) \
+            if not manifest_file else manifest_file
+        if not os.path.exists(man_file):
+            raise FileNotFoundError("Unable to locate manifest file")
+
+        # Init variables with defaults
+        man_fh, encoding, header_avail, header_set = None, None, None, False
+        try:
+            # Create man file handler
+            man_fh = open(file=manifest_file, mode="r", encoding="utf-8")
+            man_reader = csv.DictReader(
+                f=man_fh,
+                fieldnames=["filename", "filesize", "encoding", "header"])
+            # Read from manifest every split and merge to single file
+            for line in man_reader:
+                if encoding is None and header_avail is None:
+                    encoding = line.get("encoding", "")
+                    header_avail = line.get("header", "")
+                split_file = line.get("filename")
+                split_fh = None
+                try:
+                    if encoding:
+                        split_fh = open(file=split_file,
+                                        mode="r",
+                                        encoding=encoding)
+                    else:
+                        split_fh = open(file=split_file, mode="rb")
+                    if header_avail and header_set:
+                        next(split_fh)
+                    elif header_avail and not header_set:
+                        header_set = True
+                    else:
+                        pass
+
+                finally:
+                    if split_fh:
+                        split_fh.close()
+        finally:
+            if man_fh:
+                man_fh.close()
+
+
+if __name__ == '__main__':
+
+    def cb(f, s):
+        print(f, s)
+
+    FileSplit()\
+        .split(file="/Users/ram.jayapalan/Downloads/filesplit_test/EVO_Visits_20190521.dat", split_size=9000000,
+               output_dir="/Users/ram.jayapalan/Downloads/filesplit_test/",
+               callback=cb)
