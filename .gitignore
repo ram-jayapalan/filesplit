@@ -2,3 +2,5 @@
 .gitignore
 *.code-workspace
 .vscode
+.env
+**/__pycache__/
