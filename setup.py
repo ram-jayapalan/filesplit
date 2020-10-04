@@ -1,4 +1,3 @@
-
 from distutils.core import setup
 import os
 
@@ -23,8 +22,11 @@ setup(
     author="Ram Prakash Jayapalan",
     author_email="ramp16888@gmail.com",
     url="https://github.com/ram-jayapalan/filesplit",
-    download_url="https://github.com/ram-jayapalan/filesplit/archive/2.0.0.tar.gz",
+    download_url=
+    "https://github.com/ram-jayapalan/filesplit/archive/2.0.0.tar.gz",
     keywords="file split filesplit splitfile chunks splits",
-    classifiers=[],
+    classifiers=[
+        "Development Status :: 5 - Production/Stable",
+        "Programming Language :: Python :: 3"
+    ],
 )
-
