@@ -11,17 +11,18 @@ from pathlib import Path
 import math
 from typing import Callable, IO, Any, Tuple
 import csv
+import time
 
 
-class FileSplit:
+class Filesplit:
     def __init__(self) -> None:
         """
         Constructor
         """
-        self._log = logging.getLogger(__name__).getChild(
+        self.log = logging.getLogger(__name__).getChild(
             self.__class__.__name__)
+        self.man_filename = "fs_manifest.csv"
         self._buffer_size = 1000000  # 1 MB
-        self._man_filename = "fs_manifest.csv"
 
     def __process_split(self,
                         fi: IO,
@@ -110,6 +111,9 @@ class FileSplit:
         three arguments - full file path to the destination, size of the file 
         in bytes and line count.
         """
+        start_time = time.time()
+        self.log.info("Starting file split process")
+
         newline = kwargs.get("newline", False)
         include_header = kwargs.get("include_header", False)
         # If include_header is provided, default newline flag to True as this
@@ -139,7 +143,7 @@ class FileSplit:
             else:
                 fi = open(file=file, mode="rb")
             # Create file handler for the manifest file
-            man_file = os.path.join(output_dir, self._man_filename)
+            man_file = os.path.join(output_dir, self.man_filename)
             man = open(file=man_file, mode="w+", encoding="utf-8")
             # Create man file csv dict writer object
             man_writer = csv.DictWriter(
@@ -196,11 +200,17 @@ class FileSplit:
             if man:
                 man.close()
 
+        run_time = round((time.time() - start_time) / 60)
+
+        self.log.info(f"Process complete")
+        self.log.info(f"Run time(m): {run_time}")
+
     def merge(self,
               input_dir: str,
-              output_file: str,
+              output_file: str = None,
               manifest_file: str = None,
-              callback: Callable = None) -> None:
+              callback: Callable = None,
+              cleanup: bool = False) -> None:
         """Merges the split files based off manifest file
 
         Args:
@@ -215,6 +225,9 @@ class FileSplit:
             [func (str, long)] that accepts 2 arguments - path to destination
             , size of the file in bytes
 
+            cleanup (bool): if True, all the split files, manifest file will be
+            deleted after merge leaving behind the merged file.
+
             manifest_file (str): path to the manifest file. If not provided, 
             the process will look for the file within the input_dir
         Raises:
@@ -222,58 +235,95 @@ class FileSplit:
 
             NotADirectoryError: if input path is not a directory
         """
+        start_time = time.time()
+        self.log.info("Starting file merge process")
+
         if not os.path.isdir(input_dir):
             raise NotADirectoryError(
                 "Input directory is not a valid directory")
 
-        man_file = os.path.join(input_dir, self._man_filename) \
+        manifest_file = os.path.join(input_dir, self.man_filename) \
             if not manifest_file else manifest_file
-        if not os.path.exists(man_file):
+        if not os.path.exists(manifest_file):
             raise FileNotFoundError("Unable to locate manifest file")
 
-        # Init variables with defaults
-        man_fh, encoding, header_avail, header_set = None, None, None, False
+        fo = None
+        clear_output_file = True
+        header_set = False
+
         try:
-            # Create man file handler
-            man_fh = open(file=manifest_file, mode="r", encoding="utf-8")
-            man_reader = csv.DictReader(
-                f=man_fh,
-                fieldnames=["filename", "filesize", "encoding", "header"])
             # Read from manifest every split and merge to single file
-            for line in man_reader:
-                if encoding is None and header_avail is None:
-                    encoding = line.get("encoding", "")
-                    header_avail = line.get("header", "")
-                split_file = line.get("filename")
-                split_fh = None
-                try:
-                    if encoding:
-                        split_fh = open(file=split_file,
-                                        mode="r",
-                                        encoding=encoding)
-                    else:
-                        split_fh = open(file=split_file, mode="rb")
-                    if header_avail and header_set:
-                        next(split_fh)
-                    elif header_avail and not header_set:
-                        header_set = True
-                    else:
-                        pass
-
-                finally:
-                    if split_fh:
-                        split_fh.close()
+            with open(file=manifest_file, mode="r",
+                      encoding="utf-8") as man_fh:
+                man_reader = csv.DictReader(f=man_fh)
+                for line in man_reader:
+                    encoding = line.get("encoding", None)
+                    header_avail = line.get("header", None)
+                    # Derive output filename from split file if output file
+                    # not provided
+                    if not output_file:
+                        f, ext = ntpath.splitext(line.get("filename"))
+                        output_filename = "".join([f.rsplit("_", 1)[0], ext])
+                        output_file = os.path.join(input_dir, output_filename)
+                    # Clear output file present before merging. This should
+                    # happen only once during beginning of merge
+                    if clear_output_file:
+                        if os.path.exists(output_file):
+                            os.remove(output_file)
+                        clear_output_file = False
+                    # Create write file handle based on the encoding from
+                    # man file
+                    if not fo:
+                        if encoding:
+                            fo = open(file=output_file,
+                                      mode="a",
+                                      encoding=encoding)
+                        else:
+                            fo = open(file=output_file, mode="ab")
+                    # Open the split file in read more and write contents to the
+                    # output file
+                    try:
+                        input_file = os.path.join(input_dir,
+                                                  line.get("filename"))
+                        if encoding:
+                            fi = open(file=input_file,
+                                      mode="r",
+                                      encoding=encoding)
+                        else:
+                            fi = open(file=input_file, mode="rb")
+                        # Skip header if the flag is set to True
+                        if header_set:
+                            next(fi)
+                        for line in fi:
+                            if header_avail and not header_set:
+                                header_set = True
+                            fo.write(line)
+                    finally:
+                        if fi:
+                            fi.close()
         finally:
-            if man_fh:
-                man_fh.close()
+            if fo:
+                fo.close()
 
+        # Clean up files if required
+        if cleanup:
+            # Clean up split files
+            with open(file=manifest_file, mode="r",
+                      encoding="utf-8") as man_fh:
+                man_reader = csv.DictReader(f=man_fh)
+                for line in man_reader:
+                    f = os.path.join(input_dir, line.get("filename"))
+                    if os.path.exists(f):
+                        os.remove(f)
+            # Clean up man file
+            if os.path.exists(manifest_file):
+                os.remove(manifest_file)
 
-if __name__ == '__main__':
+        # Call the callback function with path and file size
+        if callback:
+            callback(output_file, os.stat(output_file).st_size)
 
-    def cb(f, s):
-        print(f, s)
+        run_time = round((time.time() - start_time) / 60)
 
-    FileSplit()\
-        .split(file="/Users/ram.jayapalan/Downloads/filesplit_test/EVO_Visits_20190521.dat", split_size=9000000,
-               output_dir="/Users/ram.jayapalan/Downloads/filesplit_test/",
-               callback=cb)
+        self.log.info(f"Process complete")
+        self.log.info(f"Run time(m): {run_time}")
