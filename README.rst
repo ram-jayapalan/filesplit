@@ -18,6 +18,23 @@ System Requirements
 
 **Python version**: 3
 
+Changelog
+----------
+
+**v3.0.0**
+
+Here is what changed from previous versions
+
+* v3.0.0 is not backward compatible to the previous versions. This is for good, following a futuristic approach.
+
+* ``splitbyencoding()`` method has been removed and the functionality has been moved to ``split()`` method.
+
+* Added support for splitting unstructured files including binary files.
+
+* Merge functionality has been introduced to merge the split files back.
+
+* Performance optimizations.
+
 Usage
 -----
 
