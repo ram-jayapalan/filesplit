@@ -27,6 +27,10 @@ Here is what changed from previous versions
 
 * v3.0.0 is not backward compatible to the previous versions. This is for good, following a futuristic approach.
 
+* ``FileSplit`` class has been renamed to ``Filesplit``
+
+* Added logging functionality
+
 * ``splitbyencoding()`` method has been removed and the functionality has been moved to ``split()`` method.
 
 * Added support for splitting unstructured files including binary files.
