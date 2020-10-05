@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-__Author__ = 'Ram Jayapalan'
+__Author__ = 'Ram Prakash Jayapalan'
 __PyVersion__ = '3'
 __Created__ = 'Sep 12, 2020'
 

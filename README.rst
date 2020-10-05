@@ -32,9 +32,9 @@ Create an instance
 
 .. code-block:: python
 
-    from fsplit.filesplit import FileSplit
+    from fsplit.filesplit import Filesplit
 
-    fs = FileSplit()
+    fs = Filesplit()
 
 With the instance created, the following functionalities can be leveraged.
 
