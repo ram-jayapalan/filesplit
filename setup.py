@@ -26,7 +26,10 @@ setup(
     "https://github.com/ram-jayapalan/filesplit/archive/2.0.0.tar.gz",
     keywords="file split filesplit splitfile chunks splits",
     classifiers=[
+        "Intended Audience :: Developers",
         "Development Status :: 5 - Production/Stable",
-        "Programming Language :: Python :: 3"
+        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: BSD License"
     ],
 )
