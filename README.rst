@@ -21,6 +21,10 @@ System Requirements
 Changelog
 ----------
 
+**v3.0.1**
+
+* Bug fix for module throwing exception when using ``newline`` set to ``True`` and ``include_header`` set to ``False``
+
 **v3.0.0**
 
 Here is what changed from previous versions

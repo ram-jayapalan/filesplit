@@ -4,10 +4,10 @@ import os
 
 def get_long_desc():
 
-    if not os.path.isfile('README.rst'):
+    if not os.path.isfile("README.rst"):
         return
 
-    with open('README.rst') as f:
+    with open("README.rst") as f:
         desc = f.read()
 
     return desc
@@ -16,20 +16,19 @@ def get_long_desc():
 setup(
     name="filesplit",
     packages=["fsplit"],
-    version="3.0.0",
+    version="3.0.1",
     description="Module to split file of any size into multiple chunks",
     long_description=get_long_desc(),
     author="Ram Prakash Jayapalan",
     author_email="ramp16888@gmail.com",
     url="https://github.com/ram-jayapalan/filesplit",
-    download_url=
-    "https://github.com/ram-jayapalan/filesplit/archive/v3.0.0.tar.gz",
+    download_url="https://github.com/ram-jayapalan/filesplit/archive/v3.0.1.tar.gz",
     keywords="file split filesplit splitfile chunks splits",
     classifiers=[
         "Intended Audience :: Developers",
         "Development Status :: 5 - Production/Stable",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: BSD License"
+        "License :: OSI Approved :: BSD License",
     ],
 )
