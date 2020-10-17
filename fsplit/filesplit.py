@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-__Author__ = 'Ram Prakash Jayapalan'
-__PyVersion__ = '3'
-__Created__ = 'Sep 12, 2020'
+__Author__ = "Ram Prakash Jayapalan"
+__PyVersion__ = "3"
+__Created__ = "Sep 12, 2020"
 
 import logging
 import os
@@ -17,23 +17,24 @@ class Filesplit:
         """
         Constructor
         """
-        self.log = logging.getLogger(__name__).getChild(
-            self.__class__.__name__)
+        self.log = logging.getLogger(__name__).getChild(self.__class__.__name__)
         self.man_filename = "fs_manifest.csv"
         self._buffer_size = 1000000  # 1 MB
 
-    def __process_split(self,
-                        fi: IO,
-                        fo: IO,
-                        split_size: int,
-                        newline: bool = False,
-                        carry_over: str = None,
-                        output_encoding: str = None,
-                        include_header: bool = False,
-                        header: str = None) -> Tuple:
+    def __process_split(
+        self,
+        fi: IO,
+        fo: IO,
+        split_size: int,
+        newline: bool = False,
+        carry_over: str = None,
+        output_encoding: str = None,
+        include_header: bool = False,
+        header: str = None,
+    ) -> Tuple:
         """
         Process that splits the incoming stream
-        :param fi: input file like object that implements read() and readline() 
+        :param fi: input file like object that implements read() and readline()
         method
         :param fo: file like object that implements write() method
         :param split_size: file split size in bytes
@@ -46,22 +47,29 @@ class Filesplit:
         :param header: header from the file if any
         :return:
         """
-        buffer_size = split_size if split_size < self._buffer_size else \
-            self._buffer_size
+        buffer_size = (
+            split_size if split_size < self._buffer_size else self._buffer_size
+        )
         buffer = 0
         if not newline:
             while True:
                 if carry_over:
                     fo.write(carry_over)
-                    buffer += len(carry_over) if not output_encoding else len(
-                        carry_over.encode(output_encoding))
+                    buffer += (
+                        len(carry_over)
+                        if not output_encoding
+                        else len(carry_over.encode(output_encoding))
+                    )
                     carry_over = None
                     continue
                 chunk = fi.read(buffer_size)
                 if not chunk:
                     break
-                chunk_size = len(chunk) if not output_encoding else len(
-                    chunk.encode(output_encoding))
+                chunk_size = (
+                    len(chunk)
+                    if not output_encoding
+                    else len(chunk.encode(output_encoding))
+                )
                 if buffer + chunk_size <= split_size:
                     fo.write(chunk)
                     buffer += chunk_size
@@ -74,16 +82,28 @@ class Filesplit:
                 if header:
                     fo.write(header)
                 fo.write(carry_over)
-                buffer += len(carry_over) + len(
-                    header) if not output_encoding else len(
-                        carry_over.encode(output_encoding)) + len(
-                            header.encode(output_encoding))
+                if header:
+                    buffer += (
+                        len(carry_over) + len(header)
+                        if not output_encoding
+                        else len(carry_over.encode(output_encoding))
+                        + len(header.encode(output_encoding))
+                    )
+                else:
+                    buffer += (
+                        len(carry_over)
+                        if not output_encoding
+                        else len(carry_over.encode(output_encoding))
+                    )
                 carry_over = None
             for line in fi:
                 if include_header and not header:
                     header = line
-                line_size = len(line) if not output_encoding else len(
-                    line.encode(output_encoding))
+                line_size = (
+                    len(line)
+                    if not output_encoding
+                    else len(line.encode(output_encoding))
+                )
                 if buffer + line_size <= split_size:
                     fo.write(line)
                     buffer += line_size
@@ -92,21 +112,23 @@ class Filesplit:
                     break
             return carry_over, buffer, header
 
-    def split(self,
-              file: str,
-              split_size: int,
-              output_dir: str = ".",
-              callback: Callable = None,
-              **kwargs) -> None:
+    def split(
+        self,
+        file: str,
+        split_size: int,
+        output_dir: str = ".",
+        callback: Callable = None,
+        **kwargs,
+    ) -> None:
         """
-        Splits the file into chunks based on the newline char in the file. 
+        Splits the file into chunks based on the newline char in the file.
         By default uses binary mode.
         :param file: path to the source file
         :param split_size: file split size in bytes
         :param output_dir: output dir to write the split files
-        :param callable callback: (Optional) callback function 
+        :param callable callback: (Optional) callback function
         [func (str, long, long)] that accepts
-        three arguments - full file path to the destination, size of the file 
+        three arguments - full file path to the destination, size of the file
         in bytes and line count.
         """
         start_time = time.time()
@@ -128,8 +150,10 @@ class Filesplit:
         # Split file encoding cannot be specified without specifying encoding
         # which is required to read the file in text mode
         if split_file_encoding and not encoding:
-            raise ValueError("`encoding` needs to be specified "
-                             "when providing `split_file_encoding`")
+            raise ValueError(
+                "`encoding` needs to be specified "
+                "when providing `split_file_encoding`"
+            )
         try:
             # Determine the splits based off bytes when newline is set to False.
             # If newline is True, split only at newline considering the bytes
@@ -145,8 +169,8 @@ class Filesplit:
             man = open(file=man_file, mode="w+", encoding="utf-8")
             # Create man file csv dict writer object
             man_writer = csv.DictWriter(
-                f=man,
-                fieldnames=["filename", "filesize", "encoding", "header"])
+                f=man, fieldnames=["filename", "filesize", "encoding", "header"]
+            )
             # Write man file header
             man_writer.writeheader()
 
@@ -154,18 +178,16 @@ class Filesplit:
 
             while carry_over is not None:
                 split_file = os.path.join(
-                    output_dir, "{0}_{1}{2}".format(filename, split_counter,
-                                                    ext))
+                    output_dir, "{0}_{1}{2}".format(filename, split_counter, ext)
+                )
                 fo = None
                 try:
                     if encoding and not split_file_encoding:
-                        fo = open(file=split_file,
-                                  mode="w+",
-                                  encoding=encoding)
+                        fo = open(file=split_file, mode="w+", encoding=encoding)
                     elif encoding and split_file_encoding:
-                        fo = open(file=split_file,
-                                  mode="w+",
-                                  encoding=split_file_encoding)
+                        fo = open(
+                            file=split_file, mode="w+", encoding=split_file_encoding
+                        )
                     else:
                         fo = open(file=split_file, mode="wb+")
                     carry_over, output_size, header = self.__process_split(
@@ -176,7 +198,8 @@ class Filesplit:
                         output_encoding=split_file_encoding,
                         carry_over=carry_over,
                         include_header=include_header,
-                        header=header)
+                        header=header,
+                    )
                     if callback:
                         callback(split_file, output_size)
                     # Write to manifest file
@@ -184,7 +207,7 @@ class Filesplit:
                         "filename": ntpath.split(split_file)[1],
                         "filesize": output_size,
                         "encoding": encoding,
-                        "header": True if header else None
+                        "header": True if header else None,
                     }
                     man_writer.writerow(di)
 
@@ -203,30 +226,32 @@ class Filesplit:
         self.log.info(f"Process complete")
         self.log.info(f"Run time(m): {run_time}")
 
-    def merge(self,
-              input_dir: str,
-              output_file: str = None,
-              manifest_file: str = None,
-              callback: Callable = None,
-              cleanup: bool = False) -> None:
+    def merge(
+        self,
+        input_dir: str,
+        output_file: str = None,
+        manifest_file: str = None,
+        callback: Callable = None,
+        cleanup: bool = False,
+    ) -> None:
         """Merges the split files based off manifest file
 
         Args:
-            input_dir (str): directory containing the split files and manifest 
+            input_dir (str): directory containing the split files and manifest
             file
 
             output_file (str): final merged output file path. If not provided,
-            the final merged filename is derived from the split filename and 
+            the final merged filename is derived from the split filename and
             placed in the same input dir
 
-            callback (Callable): callback function 
+            callback (Callable): callback function
             [func (str, long)] that accepts 2 arguments - path to destination
             , size of the file in bytes
 
             cleanup (bool): if True, all the split files, manifest file will be
             deleted after merge leaving behind the merged file.
 
-            manifest_file (str): path to the manifest file. If not provided, 
+            manifest_file (str): path to the manifest file. If not provided,
             the process will look for the file within the input_dir
         Raises:
             FileNotFoundError: if missing manifest and split files
@@ -237,11 +262,13 @@ class Filesplit:
         self.log.info("Starting file merge process")
 
         if not os.path.isdir(input_dir):
-            raise NotADirectoryError(
-                "Input directory is not a valid directory")
+            raise NotADirectoryError("Input directory is not a valid directory")
 
-        manifest_file = os.path.join(input_dir, self.man_filename) \
-            if not manifest_file else manifest_file
+        manifest_file = (
+            os.path.join(input_dir, self.man_filename)
+            if not manifest_file
+            else manifest_file
+        )
         if not os.path.exists(manifest_file):
             raise FileNotFoundError("Unable to locate manifest file")
 
@@ -251,8 +278,7 @@ class Filesplit:
 
         try:
             # Read from manifest every split and merge to single file
-            with open(file=manifest_file, mode="r",
-                      encoding="utf-8") as man_fh:
+            with open(file=manifest_file, mode="r", encoding="utf-8") as man_fh:
                 man_reader = csv.DictReader(f=man_fh)
                 for line in man_reader:
                     encoding = line.get("encoding", None)
@@ -273,20 +299,15 @@ class Filesplit:
                     # man file
                     if not fo:
                         if encoding:
-                            fo = open(file=output_file,
-                                      mode="a",
-                                      encoding=encoding)
+                            fo = open(file=output_file, mode="a", encoding=encoding)
                         else:
                             fo = open(file=output_file, mode="ab")
                     # Open the split file in read more and write contents to the
                     # output file
                     try:
-                        input_file = os.path.join(input_dir,
-                                                  line.get("filename"))
+                        input_file = os.path.join(input_dir, line.get("filename"))
                         if encoding:
-                            fi = open(file=input_file,
-                                      mode="r",
-                                      encoding=encoding)
+                            fi = open(file=input_file, mode="r", encoding=encoding)
                         else:
                             fi = open(file=input_file, mode="rb")
                         # Skip header if the flag is set to True
@@ -306,8 +327,7 @@ class Filesplit:
         # Clean up files if required
         if cleanup:
             # Clean up split files
-            with open(file=manifest_file, mode="r",
-                      encoding="utf-8") as man_fh:
+            with open(file=manifest_file, mode="r", encoding="utf-8") as man_fh:
                 man_reader = csv.DictReader(f=man_fh)
                 for line in man_reader:
                     f = os.path.join(input_dir, line.get("filename"))
@@ -325,3 +345,19 @@ class Filesplit:
 
         self.log.info(f"Process complete")
         self.log.info(f"Run time(m): {run_time}")
+
+
+# if __name__ == "__main__":
+
+#     def cb(f, s):
+#         print(f, s)
+
+#     fs = Filesplit()
+
+#     fs.split(
+#         file="/Users/ram.jayapalan/Downloads/glove/glove.6B.300d.txt",
+#         split_size=500000000,
+#         output_dir="/Users/ram.jayapalan/Downloads/glove/",
+#         callback=cb,
+#         newline=True,
+#     )
