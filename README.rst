@@ -21,6 +21,10 @@ System Requirements
 Changelog
 ----------
 
+**v3.0.2**
+
+* Bug fix for module producing infinite number of empty split files when the split size provided is greater than the file size
+
 **v3.0.1**
 
 * Bug fix for module throwing exception when using ``newline`` set to ``True`` and ``include_header`` set to ``False``

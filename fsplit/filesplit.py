@@ -7,7 +7,7 @@ __Created__ = "Sep 12, 2020"
 import logging
 import os
 import ntpath
-from typing import Callable, IO, Tuple
+from typing import Callable, IO, Tuple, Optional
 import csv
 import time
 
@@ -26,8 +26,8 @@ class Filesplit:
         fi: IO,
         fo: IO,
         split_size: int,
+        carry_over: Optional[str],
         newline: bool = False,
-        carry_over: str = None,
         output_encoding: str = None,
         include_header: bool = False,
         header: str = None,
@@ -76,6 +76,9 @@ class Filesplit:
                 else:
                     carry_over = chunk
                     break
+            # Set the carry_over to None if there is no carry_over available
+            if not carry_over:
+                carry_over = None
             return carry_over, buffer, None
         else:
             if carry_over:
@@ -110,6 +113,9 @@ class Filesplit:
                 else:
                     carry_over = line
                     break
+            # Set the carry_over to None if there is no carry_over available
+            if not carry_over:
+                carry_over = None
             return carry_over, buffer, header
 
     def split(
@@ -355,9 +361,12 @@ class Filesplit:
 #     fs = Filesplit()
 
 #     fs.split(
-#         file="/Users/ram.jayapalan/Downloads/glove/glove.6B.300d.txt",
-#         split_size=500000000,
-#         output_dir="/Users/ram.jayapalan/Downloads/glove/",
+#         file="/Users/ram.jayapalan/Downloads/filesplit_test/test_20200518.txt",
+#         split_size=30000000,
+#         output_dir="/Users/ram.jayapalan/Downloads/filesplit_test/splits/",
 #         callback=cb,
 #         newline=True,
+#         include_header=True,
 #     )
+
+#     fs.merge("/Users/ram.jayapalan/Downloads/filesplit_test/splits/", cleanup=True)
