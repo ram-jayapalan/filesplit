@@ -27,7 +27,7 @@ setup(
     author="Ramprakash Jayapalan",
     author_email="ramp16888@gmail.com",
     url="https://github.com/ram-jayapalan/filesplit",
-    download_url="https://github.com/ram-jayapalan/filesplit/archive/v3.0.2.tar.gz",
+    download_url="https://github.com/ram-jayapalan/filesplit/archive/v4.0.0.tar.gz",
     keywords="file split, filesplit, split file, splitfile",
     classifiers=[
         "Intended Audience :: Developers",
