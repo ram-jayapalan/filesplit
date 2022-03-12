@@ -38,7 +38,7 @@ Create an instance
 
     from filesplit.split import Split
 
-    split = Split(inputfile: str, outputdir: str, overwrite: Optional[bool] = False)
+    split = Split(inputfile: str, outputdir: str)
 
 ``inputfile`` (str, Required) - Path to the original file.
 
@@ -54,18 +54,18 @@ Splits file by size.
 
 Args:
 
-    ``size`` (int, Required): Max size in bytes that is allowed in each split.
+``size`` (int, Required): Max size in bytes that is allowed in each split.
 
-    ``newline`` (bool, Optional): Setting this to True will not produce any any incomplete lines in each split. Defaults to False.
+``newline`` (bool, Optional): Setting this to True will not produce any any incomplete lines in each split. Defaults to False.
 
-    ``includeheader`` (bool, Optional): Setting this to True will include header in each split. The first line is treated as a header. Defaults to False.
+``includeheader`` (bool, Optional): Setting this to True will include header in each split. The first line is treated as a header. Defaults to False.
 
-    ``callback`` (Callable, Optional): Callback function to invoke after each split. The callback function should accept two arguments [func (str, int)] - full path to the split file, 
-    split file size (bytes). Defaults to None.
+``callback`` (Callable, Optional): Callback function to invoke after each split. The callback function should accept two arguments [func (str, int)] - full path to the split file, 
+split file size (bytes). Defaults to None.
 
 Returns:
 
-    ``None``
+``None``
 
 
 bylinecount(self, linecount: int, includeheader: Optional[bool] = False, callback: Optional[Callable] = None) -> None
@@ -75,16 +75,16 @@ Splits file by line count.
 
 Args:
 
-    ``linecount`` (int, Required): Max lines that is allowed in each split.
+``linecount`` (int, Required): Max lines that is allowed in each split.
 
-    ``includeheader`` (bool, Optional): Setting this to True will include header in each split. The first line is treated as a header. Defaults to False.
+``includeheader`` (bool, Optional): Setting this to True will include header in each split. The first line is treated as a header. Defaults to False.
 
-    ``callback`` (Callable, Optional): Callback function to invoke after each split. The callback function should accept two arguments [func (str, int)] - full path to the split file, 
-    split file size (bytes). Defaults to None.
+``callback`` (Callable, Optional): Callback function to invoke after each split. The callback function should accept two arguments [func (str, int)] - full path to the split file, 
+split file size (bytes). Defaults to None.
 
 Returns:
 
-    ``None``
+``None``
 
 The file splits are generated in this fashion ``[original_filename]_1.ext, [original_filename]_2.ext, .., [original_filename]_n.ext``.
 
@@ -105,7 +105,7 @@ Create an instance
 
     from filesplit.merge import Merge
 
-    merge = Merge(inputdir: str, outputdir: str, outputfilename: str, overwrite: Optional[bool] = False)
+    merge = Merge(inputdir: str, outputdir: str, outputfilename: str)
 
 ``inputdir`` (str, Required) - Path to the original file.
 
@@ -123,14 +123,14 @@ Merges the split files back into one single file.
 
 Args:
 
-    ``cleanup`` (bool, Optional): If True, all the split files and manifest file will be purged after successful merge. Defaults to False.
+``cleanup`` (bool, Optional): If True, all the split files and manifest file will be purged after successful merge. Defaults to False.
 
-    ``callback`` (Callable, Optional): Callback function to invoke after merge. The callback function should accept two arguments [func (str, int)] - full path to the merged file, 
-    merged file size (bytes). Defaults to None.
+``callback`` (Callable, Optional): Callback function to invoke after merge. The callback function should accept two arguments [func (str, int)] - full path to the merged file, 
+merged file size (bytes). Defaults to None.
 
 Returns:
 
-    ``None``
+``None``
 
 Moreover, 
     * The manifest file name can be changed by setting ``manfilename`` property like ``merge.manfilename='man'``. 
