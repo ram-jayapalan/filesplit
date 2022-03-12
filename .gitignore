@@ -2,3 +2,5 @@
 .vscode
 *.code-workspace
 **/.DS_Store
+build/*
+*.egg-info
