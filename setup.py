@@ -1,4 +1,10 @@
-from distutils.core import setup
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Author: rjayapalan
+Created: March 11, 2022
+"""
+from setuptools import setup
 import os
 
 
@@ -15,20 +21,26 @@ def get_long_desc() -> str:
 
 setup(
     name="filesplit",
-    packages=["fsplit"],
-    version="3.0.2",
-    description="Module to split file of any size into multiple chunks",
+    version="4.0.0",
+    description="Python module that is capable of splitting files and merging it back.",
     long_description=get_long_desc(),
-    author="Ram Prakash Jayapalan",
+    author="Ramprakash Jayapalan",
     author_email="ramp16888@gmail.com",
     url="https://github.com/ram-jayapalan/filesplit",
-    download_url="https://github.com/ram-jayapalan/filesplit/archive/v3.0.2.tar.gz",
-    keywords="file split filesplit splitfile chunks splits",
+    download_url="https://github.com/ram-jayapalan/filesplit/archive/v4.0.0.tar.gz",
+    keywords="file split, filesplit, split file, splitfile",
     classifiers=[
         "Intended Audience :: Developers",
         "Development Status :: 5 - Production/Stable",
         "Operating System :: OS Independent",
-        "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: BSD License",
+        "Programming Language :: Python :: 3 :: Only",
+        "License :: OSI Approved :: MIT License",
     ],
+    package_dir={'filesplit': 'src'},
+    packages=['filesplit', 'filesplit.common'],
+    python_requires='>=3, <4',
+    project_urls={
+        'Bug Reports': 'https://github.com/ram-jayapalan/filesplit/issues',
+        'Source': 'https://github.com/ram-jayapalan/filesplit',
+    },
 )

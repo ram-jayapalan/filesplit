@@ -4,51 +4,23 @@
 filesplit
 ==========
 
-File splitting made easy for python programmers!
+File splitting and merging made easy for python programmers!
 
-A python module that can split files of any size into multiple chunks and also merge them back. This module can be used on structured and unstructured files.
-The file splits are numbered from 1 to n as follows:
+This module 
+    * Can split files of any size into multiple chunks and also merge them back. 
+    * Can handle both structured and unstructured files.
 
-``[filename]_1.ext, [filename]_2.ext, …., [filename]_n.ext``
 
 System Requirements
 --------------------
 
 **Operating System**: Windows/Linux/Mac
 
-**Python version**: 3
+**Python version**: 3.x.x
 
-Changelog
-----------
 
-**v3.0.2**
-
-* Bug fix for module producing infinite number of empty split files when the split size provided is greater than the file size
-
-**v3.0.1**
-
-* Bug fix for module throwing exception when using ``newline`` set to ``True`` and ``include_header`` set to ``False``
-
-**v3.0.0**
-
-Here is what changed from previous versions
-
-* v3.0.0 is not backward compatible to the previous versions. This is for good, following a futuristic approach.
-
-* ``FileSplit`` class has been renamed to ``Filesplit``
-
-* Added logging functionality
-
-* ``splitbyencoding()`` method has been removed and the functionality has been moved to ``split()`` method.
-
-* Added support for splitting unstructured files including binary files.
-
-* Merge functionality has been introduced to merge the split files back.
-
-* Performance optimizations.
-
-Usage
------
+Installation
+------------
 
 The module is available as a part of PyPI and can be easily installed
 using ``pip``
@@ -57,72 +29,110 @@ using ``pip``
 
     pip install filesplit
 
+Split
+-----
+
 Create an instance
 
 .. code-block:: python
 
-    from fsplit.filesplit import Filesplit
+    from filesplit.split import Split
 
-    fs = Filesplit()
+    split = Split(inputfile: str, outputdir: str)
 
-With the instance created, the following functionalities can be leveraged.
+``inputfile`` (str, Required) - Path to the original file.
 
-split ()
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+``outputdir`` (str, Required) - Output directory path to write the file splits.
 
-Method that splits the file into multiple chunks. This method accepts the following arguments
+With the instance created, the following methods can be used on the instance
 
-``file`` (str) - Path to the source file (Required)
 
-``split_size`` (int) - Split size in bytes (Required). Each split will correspond to the size provided.
+bysize (size: int, newline: Optional[bool] = False, includeheader: Optional[bool] = False, callback: Optional[Callable] = None) -> None
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-``output_dir`` (str) - Directory to write the split files (Optional). If not provided, the current directory will be used.
+Splits file by size.
 
-``callback`` (callable) - Callback function (Optional). The callback function should accept two arguments [func (str, int)] - full path to the split file, 
-split file size (bytes). The callback function will be called after each file split.
+Args:
 
-`example:`
+``size`` (int, Required): Max size in bytes that is allowed in each split.
+
+``newline`` (bool, Optional): Setting this to True will not produce any any incomplete lines in each split. Defaults to False.
+
+``includeheader`` (bool, Optional): Setting this to True will include header in each split. The first line is treated as a header. Defaults to False.
+
+``callback`` (Callable, Optional): Callback function to invoke after each split. The callback function should accept two arguments [func (str, int)] - full path to the split file, 
+split file size (bytes). Defaults to None.
+
+Returns:
+
+``None``
+
+
+bylinecount(self, linecount: int, includeheader: Optional[bool] = False, callback: Optional[Callable] = None) -> None
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Splits file by line count.
+
+Args:
+
+``linecount`` (int, Required): Max lines that is allowed in each split.
+
+``includeheader`` (bool, Optional): Setting this to True will include header in each split. The first line is treated as a header. Defaults to False.
+
+``callback`` (Callable, Optional): Callback function to invoke after each split. The callback function should accept two arguments [func (str, int)] - full path to the split file, 
+split file size (bytes). Defaults to None.
+
+Returns:
+
+``None``
+
+The file splits are generated in this fashion ``[original_filename]_1.ext, [original_filename]_2.ext, .., [original_filename]_n.ext``.
+
+A manifest file is also created in the output directory to keep track of the file splits. This manifest file is required for merge operation.
+
+Moreover, 
+    * The delimiter for the generated splits can be changed by setting ``splitdelimiter`` property like ``split.splitdelimiter='$'``. Default is ``_`` (underscore).
+    * The manifest file name for the generated splits can be changed by setting ``manfilename`` property like ``split.manfilename='man'``. Default is ``manifest``.
+    * To forcefully and safely terminate the process set the property ``terminate`` to True while the process is running.
+
+
+Merge
+-----
+
+Create an instance
 
 .. code-block:: python
 
-    def split_cb(f, s):
-        print("file: {0}, size: {1}".format(f, s))
+    from filesplit.merge import Merge
 
-    fs.split(file="/path/to/source/file", split_size=900000, output_dir="/path/to/output/dir", callback=split_cb)
+    merge = Merge(inputdir: str, outputdir: str, outputfilename: str)
 
-By default, the split method splits the file in binary mode keeping the encoding and line endings as-is to that of the source that works for most of the use cases.
-However, the module also offers some more flexibility to control the splits by passing additional keyword arguments
+``inputdir`` (str, Required) - Path to the original file.
 
-``newline`` (bool) - (Optional) When set to ``True``, split files will not carry any incomplete lines. This flag can be helpful when splitting structured file.
+``outputdir`` (str, Required) - Output directory path to write the file splits.
 
-``include_header`` (bool) - (Optional) When set to ``True``, the first line in the source file is considered as a header and each split will include the header. This flag can be helpful when splitting structured file.
+``outputfilename`` (str, Required) - Name to use for the merged file.
 
-``encoding`` (str) - (Optional) When provided, the splits are handled in text mode with the specified encoding. The file is read and the split files are written with the same encoding. This can be useful for text files and requires the source file encoding to be known beforehand.
+With the instance created, the following method can be used on the instance
 
-``split_file_encoding`` (str) - (Optional) In case, the split files should be of different encoding to that of the source, this can be set. Note: If ``split_file_encoding`` is specified, then ``encoding`` needs to be specified as well.
 
-The split process creates a manifest file ``fs_manifest.csv`` in the output directory. This manifest file is required for the merge operation.
+merge(cleanup: Optional[bool] = False, callback: Optional[Callable] = None) -> None
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-merge()
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Merges the split files back into one single file.
 
-Method that merges the split files into a single file. This method requires the manifest file generated by the ``split()`` process along with the split files and accepts the following arguments
+Args:
 
-``input_dir`` (str) - Path to the directory containing split files (Required)
+``cleanup`` (bool, Optional): If True, all the split files and manifest file will be purged after successful merge. Defaults to False.
 
-``output_file`` (str) - Path to the final output file (Optional). If not provided, the final merged filename is derived from the split filename and placed in the same input directory. 
+``callback`` (Callable, Optional): Callback function to invoke after merge. The callback function should accept two arguments [func (str, int)] - full path to the merged file, 
+merged file size (bytes). Defaults to None.
 
-``manifest_file`` (str) - Path to the manifest file (Optional). If not provided, the process will look for the file within the ``input_dir``
+Returns:
 
-``callback`` (callable) - Callback function (Optional). The callback function should accept two arguments [func (str, int)] - full path to the final output file, file size (bytes).
+``None``
 
-``cleanup`` (bool) - (Optional) If ``True``, all the split files, manifest file will be deleted after merge leaving behind only the merged file.
-
-`example:`
-
-.. code-block:: python
-
-    def merge_cb(f, s):
-        print("file: {0}, size: {1}".format(f, s))
-
-    fs.merge(input_dir="/path/to/split/files/dir", callback=merge_cb)
+Moreover, 
+    * The manifest file name can be changed by setting ``manfilename`` property like ``merge.manfilename='man'``. 
+      The manifest file name should match with the one used during the file split process and should be available in the same directory as that of file splits. Default is ``manifest``.
+    * To forcefully and safely terminate the process set the property ``terminate`` to True while the process is running.

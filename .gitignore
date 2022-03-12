@@ -1,6 +1,6 @@
-.idea
-.gitignore
-*.code-workspace
-.vscode
-.env
 **/__pycache__/
+.vscode
+*.code-workspace
+**/.DS_Store
+build/*
+*.egg-info
