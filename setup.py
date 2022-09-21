@@ -21,13 +21,13 @@ def get_long_desc() -> str:
 
 setup(
     name="filesplit",
-    version="4.0.0",
+    version="4.0.1",
     description="Python module that is capable of splitting files and merging it back.",
     long_description=get_long_desc(),
     author="Ramprakash Jayapalan",
     author_email="ramp16888@gmail.com",
     url="https://github.com/ram-jayapalan/filesplit",
-    download_url="https://github.com/ram-jayapalan/filesplit/archive/refs/tags/v4.0.0.tar.gz",
+    download_url="https://github.com/ram-jayapalan/filesplit/archive/refs/tags/v4.0.1.tar.gz",
     keywords="file split, filesplit, split file, splitfile",
     classifiers=[
         "Intended Audience :: Developers",
