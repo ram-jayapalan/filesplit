@@ -107,9 +107,9 @@ Create an instance
 
     merge = Merge(inputdir: str, outputdir: str, outputfilename: str)
 
-``inputdir`` (str, Required) - Path to the original file.
+``inputdir`` (str, Required) - Path to the directory containing file splits.
 
-``outputdir`` (str, Required) - Output directory path to write the file splits.
+``outputdir`` (str, Required) - Output directory path to write the merged file.
 
 ``outputfilename`` (str, Required) - Name to use for the merged file.
 
