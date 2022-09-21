@@ -56,7 +56,7 @@ Args:
 
 ``size`` (int, Required): Max size in bytes that is allowed in each split.
 
-``newline`` (bool, Optional): Setting this to True will not produce any any incomplete lines in each split. Defaults to False.
+``newline`` (bool, Optional): Setting this to True will not produce any incomplete lines in each split. Defaults to False.
 
 ``includeheader`` (bool, Optional): Setting this to True will include header in each split. The first line is treated as a header. Defaults to False.
 
@@ -107,9 +107,9 @@ Create an instance
 
     merge = Merge(inputdir: str, outputdir: str, outputfilename: str)
 
-``inputdir`` (str, Required) - Path to the original file.
+``inputdir`` (str, Required) - Path to the directory containing file splits.
 
-``outputdir`` (str, Required) - Output directory path to write the file splits.
+``outputdir`` (str, Required) - Output directory path to write the merged file.
 
 ``outputfilename`` (str, Required) - Name to use for the merged file.
 
