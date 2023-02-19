@@ -29,66 +29,64 @@ using ``pip``
 
     pip install filesplit
 
-Split
------
+Creating File Splits with Split
+-------------------------------
 
-Create an instance
-
-.. code-block:: python
-
-    from filesplit.split import Split
-
-    split = Split(inputfile: str, outputdir: str)
+To split a file, create an instance of the Split class with the ``inputfile`` and ``outputdir`` arguments:
 
 ``inputfile`` (str, Required) - Path to the original file.
 
 ``outputdir`` (str, Required) - Output directory path to write the file splits.
 
-With the instance created, the following methods can be used on the instance
+
+.. code-block:: python
+
+    from filesplit.split import Split
+
+    split = Split(inputfile="path/to/original_file", outputdir="path/to/output_directory")
 
 
-bysize (size: int, newline: Optional[bool] = False, includeheader: Optional[bool] = False, callback: Optional[Callable] = None) -> None
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Splits file by size.
-
-Args:
-
-``size`` (int, Required): Max size in bytes that is allowed in each split.
-
-``newline`` (bool, Optional): Setting this to True will not produce any incomplete lines in each split. Defaults to False.
-
-``includeheader`` (bool, Optional): Setting this to True will include header in each split. The first line is treated as a header. Defaults to False.
-
-``callback`` (Callable, Optional): Callback function to invoke after each split. The callback function should accept two arguments [func (str, int)] - full path to the split file, 
-split file size (bytes). Defaults to None.
-
-Returns:
-
-``None``
+Once you have created an instance of ``Split``, you can use the following methods to split the file:
 
 
-bylinecount(self, linecount: int, includeheader: Optional[bool] = False, callback: Optional[Callable] = None) -> None
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+bysize: Splits the file based on a maximum size.
+-------------------------------------------------
 
-Splits file by line count.
+.. code-block:: python
 
-Args:
+    split.bysize(size=1000000, newline=False, includeheader=False, callback=None)
 
-``linecount`` (int, Required): Max lines that is allowed in each split.
 
-``includeheader`` (bool, Optional): Setting this to True will include header in each split. The first line is treated as a header. Defaults to False.
 
-``callback`` (Callable, Optional): Callback function to invoke after each split. The callback function should accept two arguments [func (str, int)] - full path to the split file, 
-split file size (bytes). Defaults to None.
+``size`` (int, required): The maximum size of each split in bytes.
 
-Returns:
+``newline`` (bool, optional, default False): If True, the last line in each split will not be incomplete.
 
-``None``
+``includeheader`` (bool, optional, default False): If True, the first line of the file will be treated as a header and
+included in each split.
 
-The file splits are generated in this fashion ``[original_filename]_1.ext, [original_filename]_2.ext, .., [original_filename]_n.ext``.
+``callback`` (Callable, optional, default None): A callback function that is called after each split is generated. The
+function should take two arguments: the full path to the split file and the size of the split in bytes.
 
-A manifest file is also created in the output directory to keep track of the file splits. This manifest file is required for merge operation.
+
+bylinecount: Splits the file based on a maximum line count.
+----------------------------------------------------------
+
+.. code-block:: python
+
+    split.bylinecount(linecount=10000, includeheader=False, callback=None)
+
+
+``linecount`` (int, required): The maximum number of lines in each split.
+
+``includeheader`` (bool, optional, default False): If True, the first line of the file will be treated as a header
+and included in each split.
+
+``callback`` (Callable, optional, default None): A callback function that is called after each split is generated. The
+function should take two arguments: the full path to the split file and the size of the split in bytes.
+
+The file splits will be named ``[original_filename]_1.ext``, ``[original_filename]_2.ext``, etc., and will be saved in the specified ``outputdir``.
 
 Moreover, 
     * The delimiter for the generated splits can be changed by setting ``splitdelimiter`` property like ``split.splitdelimiter='$'``. Default is ``_`` (underscore).
