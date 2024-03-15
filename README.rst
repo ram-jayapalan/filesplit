@@ -86,12 +86,13 @@ Returns:
 
 ``None``
 
-The file splits are generated in this fashion ``[original_filename]_1.ext, [original_filename]_2.ext, .., [original_filename]_n.ext``.
+The file splits are generated in this fashion ``[original_filename]_0001.ext, [original_filename]_0002.ext, .., [original_filename]_n.ext``.
 
 A manifest file is also created in the output directory to keep track of the file splits. This manifest file is required for merge operation.
 
 Moreover, 
     * The delimiter for the generated splits can be changed by setting ``splitdelimiter`` property like ``split.splitdelimiter='$'``. Default is ``_`` (underscore).
+    * The number of zero fill digits for the generated splits can be changed by setting ``splitzerofill`` property like ``split.splitzerofill=10``. Default is 4.
     * The manifest file name for the generated splits can be changed by setting ``manfilename`` property like ``split.manfilename='man'``. Default is ``manifest``.
     * To forcefully and safely terminate the process set the property ``terminate`` to True while the process is running.
 
