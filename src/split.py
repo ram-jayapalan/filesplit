@@ -37,6 +37,7 @@ class Split:
         self._inputfile = inputfile
         self._outputdir = outputdir
         self._splitdelimiter = constant.SPLIT_DELIMITER
+        self._splitzerofill = constant.ZERO_FILL
         self._manfilename = constant.MANIFEST_FILE_NAME
         self._starttime = time.time()
 
@@ -77,6 +78,15 @@ class Split:
         return self._splitdelimiter
 
     @property
+    def splitzerofill(self) -> int:
+        """Returns split file's number of zero fill digits
+
+        Returns:
+            int: Split file's number of zero fill digits
+        """
+        return self._splitzerofill
+
+    @property
     def manfilename(self) -> str:
         """Returns manifest filename
 
@@ -103,6 +113,18 @@ class Split:
             value (str): Any character
         """
         self._splitdelimiter = value
+
+    @splitzerofill.setter
+    def splitzerofill(self, value: int) -> None:
+        """Sets split file's number of zero fill digits
+
+        Args:
+            value (int): Any whole number
+        """
+        if not constant.MIN_ZERO_FILL <= value <= constant.MAX_ZERO_FILL:
+            raise error.ZeroFillOutOfRange(
+                f'Zero fill must be between {constant.MIN_ZERO_FILL} and {constant.MAX_ZERO_FILL}.')
+        self._splitzerofill = value
 
     @manfilename.setter
     def manfilename(self, value: str) -> None:
@@ -139,7 +161,8 @@ class Split:
         """
         filename = ntpath.split(self.inputfile)[1]
         fname, ext = ntpath.splitext(filename)
-        splitfilename = f'{fname}{self.splitdelimiter}{splitnum}{ext}'
+        zsplitnum = format(splitnum, '0'+str(self._splitzerofill))
+        splitfilename = f'{fname}{self.splitdelimiter}{zsplitnum}{ext}'
         return splitfilename
 
     def _getmanifestpath(self) -> str:
@@ -289,28 +312,31 @@ class Split:
         self._endprocess()
 
 
-# if __name__ == '__main__':
+if __name__ == '__main__':
 
-#     import threading
-#     import time
+    import threading
+    import time
+    import getpass
 
-#     inputfile = '/Users/rjayapalan/Downloads/test.txt'
-#     outputdir = '/Users/rjayapalan/Downloads/split_test'
+    username = getpass.getuser()
+    inputfile = f'/Users/{username}/Downloads/test.txt'
+    outputdir = f'/Users/{username}/Downloads/split_test'
 
-#     def cb(filepath: str, filesize: int):
-#         print(f'{filepath} : {filesize}')
+    def cb(filepath: str, filesize: int):
+        print(f'{filepath} : {filesize}')
 
-#     def terminatesplit(splitinstance: Split, after: int):
-#         time.sleep(after)
-#         splitinstance.terminate = True
-#         print('terminating')
+    def terminatesplit(splitinstance: Split, after: int):
+        time.sleep(after)
+        splitinstance.terminate = True
+        print('terminating')
 
-#     split = Split(inputfile, outputdir)
+    split = Split(inputfile, outputdir)
 
-#     th = threading.Thread(target=terminatesplit, args=(split, 1))
-#     th.daemon = True
-#     th.start()
+    th = threading.Thread(target=terminatesplit, args=(split, 1))
+    th.daemon = True
+    th.start()
 
-#     split.bysize(10, includeheader=True, callback=cb)
+    #split.bysize(10, includeheader=True, callback=cb)
+    split.bylinecount(10000, includeheader=True, callback=cb)
 
-#     th.join()
+    th.join()

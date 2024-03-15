@@ -178,26 +178,28 @@ class Merge:
         self._endprocess()
 
 
-# if __name__ == '__main__':
+if __name__ == '__main__':
 
-#     import threading
-#     import time
+    import threading
+    import time
+    import getpass
 
-#     def cb(path, size):
-#         print(f'{path} : {size}')
+    def cb(path, size):
+        print(f'{path} : {size}')
 
-#     def terminatemerge(mergeinstance: Merge, after: int):
-#         time.sleep(after)
-#         mergeinstance.terminate = True
-#         print('terminating')
+    def terminatemerge(mergeinstance: Merge, after: int):
+        time.sleep(after)
+        mergeinstance.terminate = True
+        print('terminating')
 
-#     merge = Merge(inputdir='/Users/rjayapalan/Downloads/split_test',
-#                   outputdir='/Users/rjayapalan/Downloads/split_test',
-#                   outputfilename='mergedfile.csv',
-#                   )
+    username = getpass.getuser()
+    merge = Merge(inputdir=f'/Users/{username}/Downloads/split_test',
+                  outputdir=f'/Users/{username}/Downloads/split_test',
+                  outputfilename='mergedfile.csv',
+                  )
 
-#     th = threading.Thread(target=terminatemerge, args=(merge, 2))
-#     th.daemon = True
-#     th.start()
+    th = threading.Thread(target=terminatemerge, args=(merge, 2))
+    th.daemon = True
+    th.start()
 
-#     merge.merge(cleanup=True, callback=cb)
+    merge.merge(cleanup=True, callback=cb)
