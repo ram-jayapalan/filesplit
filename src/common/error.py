@@ -7,3 +7,6 @@ Created: March 11, 2022
 
 class DirectoryNotEmptyError(Exception):
     pass
+
+class ZeroFillOutOfRange(Exception):
+    pass
