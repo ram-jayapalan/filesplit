@@ -161,7 +161,7 @@ class Split:
         """
         filename = ntpath.split(self.inputfile)[1]
         fname, ext = ntpath.splitext(filename)
-        zsplitnum = format(splitnum, '0'+str(self._splitzerofill))
+        zsplitnum = format(splitnum, '0'+str(self.splitzerofill))
         splitfilename = f'{fname}{self.splitdelimiter}{zsplitnum}{ext}'
         return splitfilename
 
@@ -313,30 +313,30 @@ class Split:
 
 
 # if __name__ == '__main__':
-#
+
 #     import threading
 #     import time
 #     import getpass
-#
+
 #     username = getpass.getuser()
-#     inputfile = f'/Users/{username}/Downloads/test.txt'
-#     outputdir = f'/Users/{username}/Downloads/split_test'
-#
+#     inputfile = f'/Users/{username}/Downloads/test/source/hw_25000.csv'
+#     outputdir = f'/Users/{username}/Downloads/test/target'
+
 #     def cb(filepath: str, filesize: int):
 #         print(f'{filepath} : {filesize}')
-#
+
 #     def terminatesplit(splitinstance: Split, after: int):
 #         time.sleep(after)
 #         splitinstance.terminate = True
 #         print('terminating')
-#
+
 #     split = Split(inputfile, outputdir)
-#
+
 #     th = threading.Thread(target=terminatesplit, args=(split, 1))
 #     th.daemon = True
 #     th.start()
-#
+
 #     #split.bysize(10, includeheader=True, callback=cb)
 #     split.bylinecount(10000, includeheader=True, callback=cb)
-#
+
 #     th.join()
