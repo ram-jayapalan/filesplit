@@ -97,16 +97,10 @@ Moreover,
     * To forcefully and safely terminate the process set the property ``terminate`` to True while the process is running.
 
 
-Merge
+Merging File Splits with Merge
 -----
 
-Create an instance
-
-.. code-block:: python
-
-    from filesplit.merge import Merge
-
-    merge = Merge(inputdir: str, outputdir: str, outputfilename: str)
+To merge file splits, create an instance of the Merge class with the inputdir, outputdir, and outputfilename arguments:
 
 ``inputdir`` (str, Required) - Path to the directory containing file splits.
 
@@ -114,24 +108,34 @@ Create an instance
 
 ``outputfilename`` (str, Required) - Name to use for the merged file.
 
-With the instance created, the following method can be used on the instance
+
+.. code-block:: python
+
+    from filesplit.merge import Merge
+
+    merge = Merge(inputdir="path/to/input_directory", outputdir="path/to/output_directory", outputfilename="merged_file")
 
 
-merge(cleanup: Optional[bool] = False, callback: Optional[Callable] = None) -> None
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Once you have created an instance of Merge, you can use the merge method to merge the file splits:
 
-Merges the split files back into one single file.
+merge: Merges the split files back into one single file.
+--------------------------------------------------------
 
-Args:
+.. code-block:: python
 
-``cleanup`` (bool, Optional): If True, all the split files and manifest file will be purged after successful merge. Defaults to False.
+    merge.merge(cleanup=False, callback=None)
 
-``callback`` (Callable, Optional): Callback function to invoke after merge. The callback function should accept two arguments [func (str, int)] - full path to the merged file, 
-merged file size (bytes). Defaults to None.
+``cleanup`` (bool, optional, default False): If True, all the split files and manifest file will be purged after a
+successful merge.
 
-Returns:
+``callback`` (Callable, optional, default None): A callback function that is called after the merge is complete. The
+function should take two arguments: the full path to the merged file and the size of the merged file in bytes.
 
-``None``
+The merged file will be saved in the specified ``outputdir`` with the name ``outputfilename``.
+
+A manifest file created during the splitting process is required for the merge operation. This file must be present in the ``inputdir`` directory when the ``merge`` method is called.
+
+Note that if the ``cleanup`` argument is set to ``True``, all split files and the manifest file will be deleted after a successful merge.
 
 Moreover, 
     * The manifest file name can be changed by setting ``manfilename`` property like ``merge.manfilename='man'``. 
